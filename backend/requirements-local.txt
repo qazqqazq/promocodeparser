@@ -1,0 +1,12 @@
+# Зависимости для запуска backend БЕЗ Docker (локально, на SQLite).
+# Версии подобраны под современный Python (3.11–3.13). Для Docker используется requirements.txt.
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+passlib[bcrypt]
+bcrypt==4.0.1
+python-jose[cryptography]
+python-multipart
+apscheduler
+requests
