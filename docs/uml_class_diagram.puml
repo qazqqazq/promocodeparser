@@ -1,0 +1,169 @@
+@startuml UML Классы
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Android App" {
+    class MainActivity {
+        +onCreate(savedInstanceState: Bundle)
+    }
+
+    class PromoHubApp {
+        +onCreate()
+    }
+
+    package "Data Layer" {
+        class ApiService {
+            +login(username, password): Response<TokenResponse>
+            +register(request): Response<UserResponse>
+            +getPromocodes(): Response<List<PromoCode>>
+            +toggleFavorite(id): Response<ToggleFavorite>
+            +votePromocode(id, request): Response<VoteResponse>
+        }
+
+        class RetrofitClient {
+            +api: ApiService
+            +authToken: String?
+            +setBaseUrl(url): Boolean
+        }
+
+        class SettingsManager {
+            +baseUrl: Flow<String>
+            +saveBaseUrl(url): void
+        }
+
+        class AppDatabase {
+            +promoCodeDao(): PromoCodeDao
+        }
+
+        class PromoCodeDao {
+            +getAllPromoCodes(): Flow<List<PromoCodeEntity>>
+            +insertAll(promoCodes): void
+        }
+
+        class TokenManager {
+            +saveAuthData(token, username, email): void
+            +clearAuthData(): void
+            +token: Flow<String?>
+        }
+
+        class PromoRepository {
+            +login(username, password): Result<TokenResponse>
+            +refreshPromoCodes(): Result<List<PromoCodeEntity>>
+            +toggleFavorite(id): Result<Boolean>
+            +getFavorites(): Result<List<PromoCodeEntity>>
+        }
+    }
+
+    package "Domain Layer" {
+        class AuthViewModel {
+            -state: StateFlow<AuthState>
+            +login(username, password): void
+            +register(username, email, password): void
+            +logout(): void
+        }
+
+        class PromoViewModel {
+            -state: StateFlow<PromoListState>
+            +loadPromoCodes(): void
+            +filterByService(service): void
+            +search(query): void
+            +toggleFavorite(id): void
+            +votePromocode(id, isWorking): void
+        }
+    }
+
+    package "UI Layer" {
+        class LoginScreen
+        class HomeScreen
+        class DetailScreen
+        class FavoritesScreen
+        class HistoryScreen
+        class ProfileScreen
+        class PromoCodeCard
+        class ServiceDropdown
+    }
+}
+
+package "Backend" {
+    package "API Routers" {
+        class AuthRouter {
+            +register(): UserResponse
+            +login(): Token
+            +getMe(): UserResponse
+        }
+
+        class PromoRouter {
+            +listPromocodes(): List<PromoCode>
+            +getPromocode(): PromoCode
+            +toggleFavorite(): ToggleFavorite
+            +votePromocode(): VoteResponse
+        }
+    }
+
+    class CRUD {
+        +get_user(): User
+        +create_user(): User
+        +get_promocodes(): List<PromoCode>
+        +create_promocode(): PromoCode
+        +add_favorite(): Favorite
+        +add_history(): History
+        +vote_promocode(): tuple
+    }
+
+    class Auth {
+        +verify_password(): bool
+        +create_access_token(): str
+        +get_current_user(): User
+    }
+
+    package "Database" {
+        class User
+        class PromoCode
+        class Favorite
+        class History
+        class PromoVote
+    }
+}
+
+' Relationships
+MainActivity --> PromoHubApp
+PromoHubApp ..> AppDatabase : creates
+PromoHubApp ..> RetrofitClient : creates
+
+RetrofitClient --> ApiService
+AppDatabase --> PromoCodeDao
+TokenManager ..> PromoRepository
+
+PromoRepository --> ApiService
+PromoRepository --> PromoCodeDao
+PromoRepository --> TokenManager
+
+AuthViewModel --> PromoRepository
+PromoViewModel --> PromoRepository
+
+HomeScreen --> PromoViewModel
+DetailScreen --> PromoViewModel
+FavoritesScreen --> PromoViewModel
+HistoryScreen --> PromoViewModel
+LoginScreen --> AuthViewModel
+ProfileScreen --> AuthViewModel
+
+PromoCodeCard --> PromoViewModel
+
+AuthRouter --> CRUD
+AuthRouter --> Auth
+PromoRouter --> CRUD
+
+CRUD --> User
+CRUD --> PromoCode
+CRUD --> Favorite
+CRUD --> History
+CRUD --> PromoVote
+
+ProfileScreen ..> SettingsManager
+ProfileScreen ..> RetrofitClient
+
+Auth ..> User
+
+@enduml

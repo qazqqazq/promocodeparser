@@ -1,0 +1,66 @@
+@startuml ER Диаграмма
+
+skinparam linetype ortho
+
+entity "users" as users {
+    *id : INTEGER <<PK>>
+    --
+    username : VARCHAR(50) <<UNIQUE>>
+    email : VARCHAR(100) <<UNIQUE>>
+    hashed_password : VARCHAR(255)
+    avatar_url : VARCHAR(500)
+    created_at : TIMESTAMP
+}
+
+entity "promocodes" as promocodes {
+    *id : INTEGER <<PK>>
+    --
+    code : VARCHAR(50)
+    title : VARCHAR(200)
+    description : TEXT
+    service : VARCHAR(50)
+    discount : VARCHAR(50)
+    expires_at : TIMESTAMP
+    is_active : BOOLEAN
+    rating : FLOAT
+    usage_count : INTEGER
+    source_url : VARCHAR(500)
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity "favorites" as favorites {
+    *id : INTEGER <<PK>>
+    --
+    user_id : INTEGER <<FK>>
+    promocode_id : INTEGER <<FK>>
+    created_at : TIMESTAMP
+}
+
+entity "history" as history {
+    *id : INTEGER <<PK>>
+    --
+    user_id : INTEGER <<FK>>
+    promocode_id : INTEGER <<FK>>
+    viewed_at : TIMESTAMP
+}
+
+entity "promo_votes" as promo_votes {
+    *id : INTEGER <<PK>>
+    --
+    user_id : INTEGER <<FK>>
+    promocode_id : INTEGER <<FK>>
+    is_working : BOOLEAN
+    created_at : TIMESTAMP
+    --
+    UNIQUE(user_id, promocode_id)
+}
+
+users ||--o{ favorites
+users ||--o{ history
+users ||--o{ promo_votes
+promocodes ||--o{ favorites
+promocodes ||--o{ history
+promocodes ||--o{ promo_votes
+
+@enduml

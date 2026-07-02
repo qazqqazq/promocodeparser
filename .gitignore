@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Android
+android/.gradle/
+android/app/build/
+android/local.properties
+android/*.iml
+android/.idea/
+android/.DS_Store
+
+# Database
+*.db
+*.sqlite3
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Инструменты запуска (бинарники, в репозиторий не нужны)
+.claude/
+*.exe
+*.zip
+*.apk
+
+# Android build
+android/build/
+android/gradle-home/
+*.keystore

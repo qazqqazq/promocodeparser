@@ -1,0 +1,70 @@
+@startuml Диаграмма последовательности
+
+actor User
+participant UI as Android UI
+participant VM as ViewModel
+participant Repo as Repository
+participant API as Retrofit API
+participant Server as FastAPI Server
+database DB as PostgreSQL
+
+== Авторизация ==
+
+User -> UI: Вводит логин и пароль
+UI -> VM: login(username, password)
+VM -> Repo: login(username, password)
+Repo -> API: POST /api/auth/login
+API -> Server: Запрос на авторизацию
+Server -> DB: SELECT * FROM users WHERE username = ?
+DB --> Server: Данные пользователя
+Server -> Server: Проверка пароля
+Server --> API: JWT токен
+API --> Repo: TokenResponse
+Repo -> Repo: Сохранение токена
+Repo --> VM: Result.success
+VM --> UI: Обновление UI
+UI -> User: Отображение главного экрана
+
+== Загрузка промокодов ==
+
+User -> UI: Открывает главный экран
+UI -> VM: loadPromoCodes()
+VM -> Repo: refreshPromoCodes()
+Repo -> API: GET /api/promocodes/
+API -> Server: Запрос промокодов
+Server -> DB: SELECT * FROM promocodes WHERE is_active = true
+DB --> Server: Список промокодов
+Server --> API: List<PromoCode>
+API --> Repo: Список промокодов
+Repo -> Repo: Сохранение в Room DB
+Repo --> VM: Result.success
+VM --> UI: Обновление списка
+
+== Добавление в избранное ==
+
+User -> UI: Нажимает кнопку "Избранное"
+UI -> VM: toggleFavorite(id)
+VM -> Repo: toggleFavorite(id)
+Repo -> API: POST /api/promocodes/{id}/favorite
+API -> Server: Запрос на изменение
+Server -> DB: INSERT INTO favorites
+Server --> API: is_favorited: true
+API --> Repo: ToggleFavoriteResponse
+Repo --> VM: Result.success
+VM --> UI: Обновление иконки
+
+== Поиск промокодов ==
+
+User -> UI: Вводит поисковый запрос
+UI -> VM: search(query)
+VM -> Repo: searchOnline(query)
+Repo -> API: GET /api/promocodes/?search=query
+API -> Server: Поиск промокодов
+Server -> DB: SELECT * FROM promocodes WHERE title LIKE %query%
+DB --> Server: Результаты поиска
+Server --> API: List<PromoCode>
+API --> Repo: Результаты
+Repo --> VM: Result.success
+VM --> UI: Отображение результатов
+
+@enduml
